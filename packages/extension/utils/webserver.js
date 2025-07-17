@@ -1,11 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const WebpackDevServer = require('webpack-dev-server')
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const webpack = require('webpack')
 // const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const env = require('./env')
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const config = require('../webpack.config')([
   new webpack.HotModuleReplacementPlugin(),
   // new HardSourceWebpackPlugin()

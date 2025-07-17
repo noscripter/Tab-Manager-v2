@@ -22,7 +22,7 @@ Object.assign(
     .readdirSync(path.join(__dirname, jsEntry), { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
-    .map((entry) => ({ [entry]: path.join(__dirname, jsEntry, entry) }))
+    .map((entry) => ({ [entry]: path.join(__dirname, jsEntry, entry) })),
 )
 
 const secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js')
@@ -59,13 +59,13 @@ const HtmlFiles = ['popup'].map(
       minify: {
         collapseWhitespace: true,
       },
-    })
+    }),
 )
 
 const entry = Object.assign(
   ...['popup', 'background'].map((name) => ({
     [name.replace('-v3', '')]: path.join(__dirname, 'src', 'js', `${name}.tsx`),
-  }))
+  })),
 )
 
 const options = {
@@ -74,7 +74,7 @@ const options = {
     path: path.join(
       __dirname,
       'build',
-      'build_' + (process.env.TARGET_BROWSER || 'chrome')
+      'build_' + (process.env.TARGET_BROWSER || 'chrome'),
     ),
     filename: '[name].js',
   },
@@ -159,39 +159,52 @@ const options = {
       patterns: [
         ...images,
         {
-          from:
-            env.TARGET_BROWSER === 'chrome'
-              ? 'src/manifest-v3.json'
-              : 'src/manifest.json',
+          from: 'src/manifest.json',
           transform: function (content) {
             const json = JSON.parse(content.toString())
+
+            // Remove CSP in production
             if (process.env.NODE_ENV === 'production') {
               delete json.content_security_policy
             }
+
+            // Browser-specific settings
             if (
               process.env.NODE_ENV === 'production' ||
               process.env.TARGET_BROWSER !== 'firefox'
             ) {
               delete json.browser_specific_settings
             }
+
+            // Firefox-specific adjustments
             if (process.env.TARGET_BROWSER === 'firefox') {
               delete json.offline_enabled
+              // Firefox supports background.scripts with persistent: false as an alternative to service_worker
+              json.background = {
+                scripts: ['background.js'],
+                persistent: false,
+              }
             }
-            if (process.env.TARGET_BROWSER !== 'firefox') {
+
+            // Chrome-specific adjustments
+            if (process.env.TARGET_BROWSER === 'chrome') {
+              // Add tabGroups permission for Chrome
+              if (!json.permissions.includes('tabGroups')) {
+                json.permissions = json.permissions.concat('tabGroups')
+              }
+              // Remove Firefox-specific permissions
               json.permissions = json.permissions.filter(
                 (permission) =>
-                  !['contextualIdentities', 'cookies'].includes(permission)
+                  !['contextualIdentities', 'cookies'].includes(permission),
               )
             }
-            if (process.env.TARGET_BROWSER === 'chrome') {
-              json.permissions = json.permissions.concat('tabGroups')
-            }
+
             return Buffer.from(
               JSON.stringify({
                 description: process.env.npm_package_description,
                 version: process.env.npm_package_version,
                 ...json,
-              })
+              }),
             )
           },
           to: 'manifest.json',

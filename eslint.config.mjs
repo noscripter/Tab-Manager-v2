@@ -14,12 +14,30 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-export default [...compat.extends(
+export default [
+...compat.extends(
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:jest/recommended",
     "prettier",
-), {
+), 
+{
+    // Ignore patterns for files that shouldn't be linted
+    ignores: [
+        "**/build/**/*",
+        "**/dist/**/*",
+        "**/node_modules/**/*",
+        "**/*.min.js",
+        "**/*.bundle.js",
+        "**/coverage/**/*",
+        "**/__image_snapshots__/**/*",
+        "**/screenshots/**/*",
+        "**/promotional_tiles/**/*",
+        "**/*.mdx"
+    ]
+},
+{
+    // Main config for source files
     plugins: {
         "@typescript-eslint": typescriptEslint,
         jest,
@@ -53,4 +71,35 @@ export default [...compat.extends(
             argsIgnorePattern: "^_",
         }],
     },
+},
+{
+    // Special config for Node.js build scripts
+    files: [
+        "**/webpack.config.js",
+        "**/utils/*.js",
+        "**/setup.js",
+        "**/jest.config.js",
+        "**/playwright.config.ts",
+        "**/*.config.js",
+        "**/*.config.mjs",
+        "**/publish_edge.mjs"
+    ],
+    
+    rules: {
+        "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/no-var-requires": "off",
+    }
+},
+{
+    // Special config for Storybook files
+    files: [
+        "**/.storybook/**/*.js",
+        "**/*.stories.*"
+    ],
+    
+    languageOptions: {
+        globals: {
+            global: true,
+        }
+    }
 }];

@@ -54,10 +54,12 @@ export default class Store {
     this.hiddenWindowStore = new HiddenWindowStore(this)
     this.focusStore = new FocusStore(this)
     if (process.env.TARGET_BROWSER === 'firefox') {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const ContainerStore = require('./ContainerStore').default
       this.containerStore = new ContainerStore(this)
     }
     if (process.env.TARGET_BROWSER === 'chrome') {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const TabGroupStore = require('./TabGroupStore').default
       this.tabGroupStore = new TabGroupStore(this)
     }

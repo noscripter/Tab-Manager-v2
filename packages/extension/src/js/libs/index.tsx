@@ -176,7 +176,7 @@ export const getLastFocusedWindowId = async () => {
       lastFocusedWindowId: null,
     })
     return lastFocusedWindowId
-  } catch (e) {
+  } catch {
     return null
   }
 }

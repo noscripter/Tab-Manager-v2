@@ -25,13 +25,13 @@ export const setBrowserIcon = async () => {
     const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)')
     darkTheme = Boolean(darkThemeMq.matches)
   }
-  ;[browser.browserAction, browser.action].forEach((action) => {
-    if (action && action.setIcon) {
-      action.setIcon({
-        path: `${iconPathPrefix}${darkTheme ? '-dark' : ''}.png`,
-      })
-    }
-  })
+
+  // Use action API for Manifest V3
+  if (browser.action && browser.action.setIcon) {
+    browser.action.setIcon({
+      path: `${iconPathPrefix}${darkTheme ? '-dark' : ''}.png`,
+    })
+  }
 }
 
 browser.storage.onChanged.addListener((changes: any, areaName: string) => {
@@ -43,7 +43,7 @@ browser.storage.onChanged.addListener((changes: any, areaName: string) => {
 setBrowserIcon()
 
 const tabHistory = new TabHistory()
-const _createWindow = (request, sender, sendResponse) => {
+const _createWindow = (request: any, sender: any, sendResponse: any) => {
   createWindow(request.tabs)
   sendResponse()
 }
@@ -56,7 +56,7 @@ const actionMap = {
 
 Object.assign(actionMap, tabHistory.actionMap)
 
-const onMessage = (request, sender, sendResponse) => {
+const onMessage = (request: any, sender: any, sendResponse: any) => {
   const { action } = request
   const func = actionMap[action]
   if (func && typeof func === 'function') {
@@ -69,7 +69,7 @@ const onMessage = (request, sender, sendResponse) => {
 const onCommand = (action: string) => {
   const func = actionMap[action]
   if (func && typeof func === 'function') {
-    func()
+    func({}, {}, () => {})
   }
 }
 
